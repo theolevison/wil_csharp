@@ -193,9 +193,10 @@ internal class Program
 		var size = Marshal.SizeOf(typeof(NeoDeviceEx));
 		NeoDeviceEx[] managedArray = new NeoDeviceEx[2];
 
-		IntPtr ins = new IntPtr(arrayOfDevices.ToInt64());
+		IntPtr ins = new IntPtr(arrayOfDevices.ToInt32());
 		Console.WriteLine("Will it marshal?");
-		managedArray[0] = Marshal.PtrToStructure<NeoDeviceEx>(ins);
+		managedArray[0] = (NeoDeviceEx)Marshal.PtrToStructure(ins, typeof(NeoDeviceEx));
+		//managedArray[0] = Marshal.PtrToStructure<NeoDeviceEx>(ins);
 		
 		IntPtr x = IntPtr.Zero;
 		
