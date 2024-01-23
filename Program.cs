@@ -162,12 +162,13 @@ internal class Program
         //var device = icsneoFindDevices(icsneoFindDevices, 1, null, 0, null, 0);
         Console.WriteLine(icsneoGenericAPISendCommand(out IntPtr handle, '1', '0', '2', pParameters, '4', out char functionError));
 
-		Console.WriteLine(functionError);
+
+		
 		int numberOfDevices = 1;
-		IntPtr[] arrayOfPointers;
+		NeoDeviceEx[] arrayOfDevices;
 		Console.WriteLine(numberOfDevices);
 		// IntPtr as a handle for the array of devices works
-		icsneoFindDevices(out arrayOfPointers, ref numberOfDevices, 0, 0, 0, 0);
+		icsneoFindDevices(out arrayOfDevices, ref numberOfDevices, 0, 0, 0, 0);
         Console.WriteLine($"Number of devices {numberOfDevices}");
 
 		//trying to pass in an array of devices does not work
@@ -175,18 +176,16 @@ internal class Program
         //NeoDeviceEx[] handle2 = new NeoDeviceEx[10];
 		//Marshal.PtrToStructure(intHandle, typeof(NeoDeviceEx));
         //icsneoFindDevices(out handle2, ref numberOfDevices, 0, 0, 0, 0);
-		
-		Console.WriteLine($"Number of devices {numberOfDevices}");
+	
 		
 		IntPtr x = IntPtr.Zero;
 		
-		if (arrayOfPointers != null)
+		if (arrayOfDevices != null)
 		{
 			//Marshall IntPtr to neoDeviceEx
-			NeoDeviceEx deviceEx = (NeoDeviceEx)Marshal.PtrToStructure(arrayOfPointers[0], typeof(NeoDeviceEx));
-
+			
 			Console.WriteLine("not null");
-            Console.WriteLine($"Opened device {icsneoOpenNeoDevice(ref deviceEx.neoDevice, ref x, '0', 1, 0)}");
+            Console.WriteLine($"Opened device {icsneoOpenNeoDevice(ref arrayOfDevices[0].neoDevice, ref x, '0', 1, 0)}");
         } else
 		{
             Console.WriteLine($"List is null");
