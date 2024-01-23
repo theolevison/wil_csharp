@@ -7,12 +7,12 @@ public struct NeoDeviceEx
 {
 	public IntPtr neoDevice;
 
-	public IntPtr FirmwareMajor;
-	public IntPtr FirmwareMinor;
+	public uint FirmwareMajor;
+	public uint FirmwareMinor;
 
 	//#define CANNODE_STATUS_COREMINI_IS_RUNNING (0x1)
 	//#define CANNODE_STATUS_IN_BOOTLOADER (0x2)
-	public IntPtr Status; // Bitfield, see defs above
+	public uint Status; // Bitfield, see defs above
 
 	// Option bit flags
 	/*
@@ -27,20 +27,20 @@ public struct NeoDeviceEx
 	#define DRIVER_USB2 (0x80)
 	#define DRIVER_USB3 (0xC0)
     */
-	public IntPtr Options;
+	public uint Options;
 
 	public IntPtr pAvailWIFINetwork;
 	public IntPtr pWIFIInterfaceInfo;
 
 	public int isEthernetDevice;
 
-	public IntPtr MACAddress; //length 6
-	public IntPtr hardwareRev;
-	public IntPtr revReserved;
-	public IntPtr tcpIpAddress; //length 4
-	public IntPtr tcpPort;
-	public IntPtr Reserved0;
-	public IntPtr Reserved1;
+	public byte[] MACAddress; //length 6
+	public ushort hardwareRev;
+	public ushort revReserved;
+	public uint[] tcpIpAddress; //length 4
+	public ushort tcpPort;
+	public ushort Reserved0;
+	public uint Reserved1;
 }
 
 
