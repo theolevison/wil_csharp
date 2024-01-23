@@ -48,7 +48,7 @@ internal class Program
 {
 
     [DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern int icsneoFindDevices(out IntPtr possibleDevices, ref int numDevices, int diviceTypes, int numDeviceTypes, IntPtr optionsFindeNeoEx, long reserved);
+    private static extern int icsneoFindDevices(out IntPtr[] possibleDevices, ref int numDevices, int diviceTypes, int numDeviceTypes, IntPtr optionsFindeNeoEx, long reserved);
 
     [DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 	private static extern int icsneoFindDevices(out NeoDeviceEx[] possibleDevices, ref int numDevices, int diviceTypes, int numDeviceTypes, IntPtr optionsFindeNeoEx, long reserved);
@@ -164,26 +164,29 @@ internal class Program
 
 		Console.WriteLine(functionError);
 		int numberOfDevices = 1;
-		IntPtr intHandle = IntPtr.Zero;
+		IntPtr[] arrayOfPointers;
 		Console.WriteLine(numberOfDevices);
 		// IntPtr as a handle for the array of devices works
-		icsneoFindDevices(out intHandle, ref numberOfDevices, 0, 0, 0, 0);
+		icsneoFindDevices(out arrayOfPointers, ref numberOfDevices, 0, 0, 0, 0);
         Console.WriteLine($"Number of devices {numberOfDevices}");
 
 		//trying to pass in an array of devices does not work
 		//can I marshall it into my struct?
-        NeoDeviceEx[] handle2 = new NeoDeviceEx[10];
+        //NeoDeviceEx[] handle2 = new NeoDeviceEx[10];
 		//Marshal.PtrToStructure(intHandle, typeof(NeoDeviceEx));
-        icsneoFindDevices(out handle2, ref numberOfDevices, 0, 0, 0, 0);
+        //icsneoFindDevices(out handle2, ref numberOfDevices, 0, 0, 0, 0);
 		
 		Console.WriteLine($"Number of devices {numberOfDevices}");
 		
 		IntPtr x = IntPtr.Zero;
 		
-		if (handle2 != null)
+		if (arrayOfPointers != null)
 		{
+			//Marshall IntPtr to neoDeviceEx
+			NeoDeviceEx deviceEx = (NeoDeviceEx)Marshal.PtrToStructure(arrayOfPointers[0], typeof(NeoDeviceEx));
+
 			Console.WriteLine("not null");
-            Console.WriteLine($"Opened device {icsneoOpenNeoDevice(ref handle2[0].neoDevice, ref x, '0', 1, 0)}");
+            Console.WriteLine($"Opened device {icsneoOpenNeoDevice(ref deviceEx.neoDevice, ref x, '0', 1, 0)}");
         } else
 		{
             Console.WriteLine($"List is null");
