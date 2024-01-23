@@ -173,7 +173,7 @@ internal class Program
 		//trying to pass in an array of devices does not work
 		//can I marshall it into my struct?
         NeoDeviceEx[] handle2 = new NeoDeviceEx[10];
-		Marshal.PtrToStructure(intHandle, typeof(NeoDeviceEx));
+		//Marshal.PtrToStructure(intHandle, typeof(NeoDeviceEx));
         icsneoFindDevices(out handle2, ref numberOfDevices, 0, 0, 0, 0);
 		
 		Console.WriteLine($"Number of devices {numberOfDevices}");
@@ -182,6 +182,7 @@ internal class Program
 		
 		if (handle2 != null)
 		{
+			Console.WriteLine("not null");
             Console.WriteLine($"Opened device {icsneoOpenNeoDevice(ref handle2[0].neoDevice, ref x, '0', 1, 0)}");
         } else
 		{
