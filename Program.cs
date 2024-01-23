@@ -6,10 +6,12 @@ using System.Security.Cryptography;
 [StructLayout(LayoutKind.Sequential)]
 public struct NeoDeviceEx
 {
-	public IntPtr neoDevice;
+	public NeoDevice neoDevice;
 
 	public uint FirmwareMajor;
 	public uint FirmwareMinor;
+
+	
 
 	//#define CANNODE_STATUS_COREMINI_IS_RUNNING (0x1)
 	//#define CANNODE_STATUS_IN_BOOTLOADER (0x2)
@@ -44,6 +46,15 @@ public struct NeoDeviceEx
 	public uint Reserved1;
 }
 
+[StructLayout(LayoutKind.Sequential)]
+public struct NeoDevice
+{
+	public uint DeviceType;
+	public int Handle;
+	public int NumberOfClients;
+	public int SerialNumber;
+	public int MaxAllowedClients;
+}
 
 internal class Program
 {
