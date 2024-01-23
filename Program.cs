@@ -191,9 +191,9 @@ internal class Program
         //icsneoFindDevices(out handle2, ref numberOfDevices, 0, 0, 0, 0);
 
 		var size = Marshal.SizeOf(typeof(NeoDeviceEx));
-		NeoDeviceEx[] managedArray = new NeoDeviceEx[size];
+		NeoDeviceEx[] managedArray = new NeoDeviceEx[2];
 
-		IntPtr ins = new nint(arrayOfDevices.ToInt64());
+		IntPtr ins = new IntPtr(arrayOfDevices.ToInt64());
 		Console.WriteLine("Will it marshal?");
 		managedArray[0] = Marshal.PtrToStructure<NeoDeviceEx>(ins);
 		
