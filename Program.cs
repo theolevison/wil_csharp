@@ -67,7 +67,7 @@ internal class Program
 	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 	private static extern int icsneoGenericAPISendCommand(out IntPtr handle, char apiIndex, char instanceIndex, char functionIndex, byte[] bData, int length, out char functionError);
 	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	private static extern int icsneoOpenNeoDevice(ref IntPtr device, ref IntPtr handle, char networkIDs, int configRead, int options);
+	private static extern int icsneoOpenNeoDevice(ref NeoDevice device, ref IntPtr handle, char networkIDs, int configRead, int options);
 
     /*
      * typedef struct
