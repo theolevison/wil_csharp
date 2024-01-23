@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct NeoDeviceEx
@@ -182,6 +183,7 @@ internal class Program
 		NeoDeviceEx[] managedArray = new NeoDeviceEx[size];
 
 		IntPtr ins = new nint(arrayOfDevices.ToInt64());
+		Console.WriteLine("Will it marshal?");
 		managedArray[0] = Marshal.PtrToStructure<NeoDeviceEx>(ins);
 		
 		IntPtr x = IntPtr.Zero;
