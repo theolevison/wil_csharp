@@ -60,11 +60,9 @@ internal class Program
 {
 
     [DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern int icsneoFindDevices(out IntPtr possibleDevices, ref int numDevices, int diviceTypes, int numDeviceTypes, IntPtr optionsFindeNeoEx, long reserved);
+    private static extern int icsneoFindDevices(out IntPtr possibleDevices, ref int numDevices, uint deviceTypes, uint numDeviceTypes, IntPtr optionsFindeNeoEx, ulong reserved);
 
     [DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	private static extern int icsneoFindDevices(out NeoDeviceEx[] possibleDevices, ref int numDevices, int diviceTypes, int numDeviceTypes, IntPtr optionsFindeNeoEx, long reserved);
-	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 	private static extern int icsneoGenericAPISendCommand(out IntPtr handle, char apiIndex, char instanceIndex, char functionIndex, byte[] bData, int length, out char functionError);
 	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 	private static extern int icsneoOpenNeoDevice(ref NeoDevice device, IntPtr handle, IntPtr networkIDs, int configRead, int options);
@@ -178,10 +176,10 @@ internal class Program
 		//need to access first item in array, and get neoDevice from it
 		
 		int numberOfDevices = 1;
-		IntPtr arrayOfDevices;
+		IntPtr arrayOfDevices = IntPtr.Zero;
 		Console.WriteLine(numberOfDevices);
 		// IntPtr as a handle for the array of devices works
-		icsneoFindDevices(out arrayOfDevices, ref numberOfDevices, 0, 0, 0, 0);
+		icsneoFindDevices(out arrayOfDevices, ref numberOfDevices, 0, 0, new IntPtr(), 0);
         Console.WriteLine($"Number of devices {numberOfDevices}");
 		Console.WriteLine(arrayOfDevices);
 
