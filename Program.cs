@@ -211,17 +211,18 @@ internal class Program
 		NeoDeviceEx deviceEx = (NeoDeviceEx)Marshal.PtrToStructure(new IntPtr(pointerToArray.ToInt64()), typeof(NeoDeviceEx));
 		//managedArray[0] = Marshal.PtrToStructure<NeoDeviceEx>(ins);
 		
-		
+	
 		
 		if (true)
 		{
 			//Marshall IntPtr to neoDeviceEx
 			
-			Console.WriteLine("not null");
-            //allocate memory for neoDevice
+			Console.WriteLine(deviceEx.neoDevice.SerialNumber);
+			//allocate memory for neoDevice
+			IntPtr handlePointer = IntPtr.Zero;
             IntPtr pointerToDevice = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NeoDevice)));
             Marshal.StructureToPtr(deviceEx.neoDevice, pointerToDevice, false);
-            Console.WriteLine($"Opened device {icsneoOpenNeoDevice(pointerToDevice, new IntPtr(), new IntPtr(), 1, 0)}");
+            Console.WriteLine($"Opened device {icsneoOpenNeoDevice(pointerToDevice, handlePointer, new IntPtr(), 1, 0)}");
         } else
 		{
             Console.WriteLine($"List is null");
