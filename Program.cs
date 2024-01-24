@@ -67,6 +67,8 @@ internal class Program
 	private static extern int icsneoGenericAPISendCommand(out IntPtr handle, char apiIndex, char instanceIndex, char functionIndex, byte[] bData, int length, out char functionError);
 	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 	private static extern int icsneoOpenNeoDevice(IntPtr device, IntPtr handle, IntPtr networkIDs, int configRead, int options);
+    [DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern int icsneoSerialNumberToString(int serialNumber, [MarshalAs(UnmanagedType.LPArray, SizeConst = 100)] char[] buffer, int lengthOfBuffer);
 
     /*
      * typedef struct
@@ -216,8 +218,9 @@ internal class Program
 		if (true)
 		{
 			//Marshall IntPtr to neoDeviceEx
-			
-			Console.WriteLine(deviceEx.neoDevice.SerialNumber);
+			char[] buffer = new char[100];
+			icsneoSerialNumberToString(deviceEx.neoDevice.SerialNumber, buffer, 100);
+            Console.WriteLine(buffer);
 			//allocate memory for neoDevice
 			IntPtr handlePointer = IntPtr.Zero;
             IntPtr pointerToDevice = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NeoDevice)));
