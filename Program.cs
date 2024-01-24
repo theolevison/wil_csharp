@@ -60,7 +60,7 @@ internal class Program
 {
 
     [DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern int icsneoFindDevices(out IntPtr possibleDevices, ref int numDevices, uint deviceTypes, uint numDeviceTypes, IntPtr optionsFindeNeoEx, ulong reserved);
+    private static extern int icsneoFindDevices(ref IntPtr possibleDevices, ref int numDevices, uint deviceTypes, uint numDeviceTypes, IntPtr optionsFindeNeoEx, ulong reserved);
 
     [DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 	private static extern int icsneoGenericAPISendCommand(out IntPtr handle, char apiIndex, char instanceIndex, char functionIndex, byte[] bData, int length, out char functionError);
@@ -175,13 +175,22 @@ internal class Program
 		//c array of neoDeviceEx, gets populated
 		//need to access first item in array, and get neoDevice from it
 		
+		//allocate memory for array of deviceExs
 		int numberOfDevices = 1;
-		IntPtr arrayOfDevices = IntPtr.Zero;
+		NeoDeviceEx[] arrayOfDevices = new NeoDeviceEx[10];
+		IntPtr pointerToArray = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NeoDeviceEx)) * arrayOfDevices.Length);
+		long longPtr = pointerToArray.ToInt64();
+		for (int i = 0; i < arrayOfDevices.Length; i++)
+		{
+			Marshal.StructureToPtr(arrayOfDevices[i], new IntPtr(longPtr), false);
+			longPtr += Marshal.SizeOf(typeof(NeoDeviceEx));
+		}
+
 		Console.WriteLine(numberOfDevices);
 		// IntPtr as a handle for the array of devices works
-		icsneoFindDevices(out arrayOfDevices, ref numberOfDevices, 0, 0, new IntPtr(), 0);
+		icsneoFindDevices(ref pointerToArray, ref numberOfDevices, 0, 0, new IntPtr(), 0);
         Console.WriteLine($"Number of devices {numberOfDevices}");
-		Console.WriteLine(arrayOfDevices);
+		Console.WriteLine(pointerToArray);
 
 		//trying to pass in an array of devices does not work
 		//can I marshall it into my struct?
@@ -192,11 +201,10 @@ internal class Program
 		//var size = Marshal.SizeOf(typeof(NeoDeviceEx));
 		//NeoDeviceEx[] managedArray = new NeoDeviceEx[2];
 
-		//take first chunk of memory at IntPtr location, try to turn it into NeoDeviceEx
-		
-		
+
+		//take first chunk of memory at IntPtr location, try to turn it into a NeoDeviceEx
 		Console.WriteLine("Will it marshal?");
-		NeoDeviceEx deviceEx = (NeoDeviceEx)Marshal.PtrToStructure(new IntPtr(arrayOfDevices.ToInt32()), typeof(NeoDeviceEx));
+		NeoDeviceEx deviceEx = (NeoDeviceEx)Marshal.PtrToStructure(pointerToArray, typeof(NeoDeviceEx));
 		//managedArray[0] = Marshal.PtrToStructure<NeoDeviceEx>(ins);
 		
 		
