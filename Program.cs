@@ -183,6 +183,7 @@ internal class Program
 		// IntPtr as a handle for the array of devices works
 		icsneoFindDevices(out arrayOfDevices, ref numberOfDevices, 0, 0, 0, 0);
         Console.WriteLine($"Number of devices {numberOfDevices}");
+		Console.WriteLine(arrayOfDevices);
 
 		//trying to pass in an array of devices does not work
 		//can I marshall it into my struct?
@@ -190,14 +191,14 @@ internal class Program
 		//Marshal.PtrToStructure(intHandle, typeof(NeoDeviceEx));
         //icsneoFindDevices(out handle2, ref numberOfDevices, 0, 0, 0, 0);
 
-		var size = Marshal.SizeOf(typeof(NeoDeviceEx));
-		NeoDeviceEx[] managedArray = new NeoDeviceEx[2];
+		//var size = Marshal.SizeOf(typeof(NeoDeviceEx));
+		//NeoDeviceEx[] managedArray = new NeoDeviceEx[2];
 
 		//take first chunk of memory at IntPtr location, try to turn it into NeoDeviceEx
-		//is the size of the struct fixed?
-		IntPtr ins = new IntPtr(arrayOfDevices.ToInt32());
+		
+		
 		Console.WriteLine("Will it marshal?");
-		managedArray[0] = (NeoDeviceEx)Marshal.PtrToStructure(ins, typeof(NeoDeviceEx));
+		NeoDeviceEx deviceEx = (NeoDeviceEx)Marshal.PtrToStructure(new IntPtr(arrayOfDevices.ToInt32()), typeof(NeoDeviceEx));
 		//managedArray[0] = Marshal.PtrToStructure<NeoDeviceEx>(ins);
 		
 		
@@ -207,7 +208,7 @@ internal class Program
 			//Marshall IntPtr to neoDeviceEx
 			
 			Console.WriteLine("not null");
-            Console.WriteLine($"Opened device {icsneoOpenNeoDevice(ref managedArray[0].neoDevice, new IntPtr(), '0', 1, 0)}");
+            Console.WriteLine($"Opened device {icsneoOpenNeoDevice(ref deviceEx.neoDevice, new IntPtr(), '0', 1, 0)}");
         } else
 		{
             Console.WriteLine($"List is null");
