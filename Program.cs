@@ -65,102 +65,13 @@ internal class Program
     [DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern int icsneoFindDevices(IntPtr possibleDevices, ref int numDevices, IntPtr deviceTypes, uint numDeviceTypes, IntPtr optionsFindeNeoEx, uint reserved);
 	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	private static extern int icsneoOpenNeoDevice(out IntPtr device, IntPtr handle, IntPtr networkIDs, int configRead, int options);
+	private static extern int icsneoOpenNeoDevice(out IntPtr device, out IntPtr handle, IntPtr networkIDs, int configRead, int options);
     [DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern int icsneoSerialNumberToString(int serialNumber, [MarshalAs(UnmanagedType.LPStr)] StringBuilder data, int lengthOfBuffer);
 
-    /*
-     * typedef struct
-        {
-	        uint32_t DeviceType;
-	        int32_t Handle;
-	        int32_t NumberOfClients;
-	        int32_t SerialNumber;
-	        int32_t MaxAllowedClients;
-
-        } NeoDevice;
-     */
-
-    /* 
-     * typedef struct _NeoDeviceEx
-		{
-			NeoDevice neoDevice;
-
-			uint32_t FirmwareMajor;
-			uint32_t FirmwareMinor;
-
-		#define CANNODE_STATUS_COREMINI_IS_RUNNING (0x1)
-		#define CANNODE_STATUS_IN_BOOTLOADER (0x2)
-			uint32_t Status; // Bitfield, see defs above
-
-		// Option bit flags
-		#define MAIN_VNET (0x01)
-		#define SLAVE_VNET_A (0x02)
-		#define SLAVE_VNET_B (0x04)
-		#define WIFI_CONNECTION (0x08)
-		#define REGISTER_BY_SERIAL (0x10)
-		#define TCP_SUPPORTED (0x20)
-		#define DRIVER_MASK (0xC0)
-		#define DRIVER_USB1 (0x40)
-		#define DRIVER_USB2 (0x80)
-		#define DRIVER_USB3 (0xC0)
-			uint32_t Options;
-
-			void* pAvailWIFINetwork;
-			void* pWIFIInterfaceInfo;
-
-			int isEthernetDevice;
-
-			uint8_t MACAddress[6];
-			uint16_t hardwareRev;
-			uint16_t revReserved;
-			uint32_t tcpIpAddress[4];
-			uint16_t tcpPort;
-			uint16_t Reserved0;
-			uint32_t Reserved1;
-
-		} NeoDeviceEx;
-     */
-
-    /*
-	 
-	eWILFunction_Init = 0, //0
-	eWILFunction_Terminate, //1
-	eWILFunction_Connect, //2
-	eWILFunction_Disconnect, //3
-	eWILFunction_SetMode, //4
-	eWILFunction_GetMode, //5
-	eWILFunction_SetACL, //6
-	eWILFunction_GetACL, //7
-	eWILFunction_QueryDevice, //8
-	eWILFunction_GetNetworkStatus, //9
-	eWILFunction_LoadFile, //10
-	eWILFunction_EraseFile, //11
-	eWILFunction_GetContainerDetails, //12
-	eWILFunction_SetGPIO, //13
-	eWILFunction_GetGPIO, //14
-	eWILFunction_SelectScript, //15
-	eWILFunction_ModifyScript, //16
-	eWILFunction_GetDeviceVersion, //17
-	eWILFunction_GetWilSoftwareVersion, //18
-	eWILFunction_EnterInventoryState, //19
-	eWILFunction_GetFile, //20
-	eWILFunction_SetContextualData, //21
-	eWILFunction_GetContextualData, //22
-	eWILFunction_SetStateOfHealth, //23
-	eWILFunction_GetStateOfHealth, //24
-	eWILFunction_EnableFaultServicing, //25
-	eWILFunction_ResetDevice, //26
-	eWILFunction_RotateKey, //27
-	eWILFunction_EnableNetworkDataCapture, //28
-	eWILFunction_SetCustomerIdentifierData, //29
-	eWILFunction_UpdateMonitorParameters, //30
-	eWILFunction_GetMonitorParametersCRC, //31
-	 */
     private static void Main(string[] args)
 	{
-
-		//c array of neoDeviceEx, gets populated
+		//create array of neoDeviceEx, gets populated by c function
 		//need to access first item in array, and get neoDevice from it
 		int numberOfDevices = 1;
 
@@ -175,7 +86,7 @@ internal class Program
 			longPtr += Marshal.SizeOf(typeof(NeoDeviceEx));
 		}
 
-		// IntPtr as a handle for the array of devices works
+		//populate reserved memory with NeoDeviceEx's
 		icsneoFindDevices(pointerToArray, ref numberOfDevices, IntPtr.Zero, 0, IntPtr.Zero, 0);
         Console.WriteLine($"Number of devices found: {numberOfDevices}");
 
@@ -194,7 +105,10 @@ internal class Program
         IntPtr pointerToDevice = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NeoDevice)));
         Marshal.StructureToPtr(deviceEx.neoDevice, pointerToDevice, false);
 
-		if (icsneoOpenNeoDevice(out pointerToDevice, handlePointer, IntPtr.Zero, 1, 0) == 1) {
+		//if the firmware is not correct, may not work?
+		//can be overloaded in c, but overload in c# is not implemented yet
+		if (icsneoOpenNeoDevice(out pointerToDevice, out handlePointer, IntPtr.Zero, 1, 0) == 1) {
+            //--> at this point, global var `hObject` is a reference to the open wBMS device;
             Console.WriteLine($"Opened device");
         } else
 		{
