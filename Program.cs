@@ -37,9 +37,11 @@ public struct NeoDeviceEx
 
 	public int isEthernetDevice;
 
+	[MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
 	public byte[] MACAddress; //length 6
 	public ushort hardwareRev;
 	public ushort revReserved;
+	[MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
 	public uint[] tcpIpAddress; //length 4
 	public ushort tcpPort;
 	public ushort Reserved0;
