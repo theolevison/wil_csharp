@@ -66,7 +66,7 @@ internal class Program
 	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 	private static extern int icsneoGenericAPISendCommand(out IntPtr handle, char apiIndex, char instanceIndex, char functionIndex, byte[] bData, int length, out char functionError);
 	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	private static extern int icsneoOpenNeoDevice(ref NeoDevice device, IntPtr handle, IntPtr networkIDs, int configRead, int options);
+	private static extern int icsneoOpenNeoDevice(NeoDevice device, IntPtr handle, IntPtr networkIDs, int configRead, int options);
 
     /*
      * typedef struct
@@ -218,7 +218,7 @@ internal class Program
 			//Marshall IntPtr to neoDeviceEx
 			
 			Console.WriteLine("not null");
-            Console.WriteLine($"Opened device {icsneoOpenNeoDevice(ref deviceEx.neoDevice, new IntPtr(), '0', 1, 0)}");
+            Console.WriteLine($"Opened device {icsneoOpenNeoDevice(deviceEx.neoDevice, new IntPtr(), new IntPtr(), 1, 0)}");
         } else
 		{
             Console.WriteLine($"List is null");
