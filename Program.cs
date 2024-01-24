@@ -67,7 +67,7 @@ internal class Program
 	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 	private static extern int icsneoGenericAPISendCommand(out IntPtr handle, char apiIndex, char instanceIndex, char functionIndex, byte[] bData, int length, out char functionError);
 	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	private static extern int icsneoOpenNeoDevice(ref NeoDevice device, ref IntPtr handle, char networkIDs, int configRead, int options);
+	private static extern int icsneoOpenNeoDevice(ref NeoDevice device, ref int handle, char networkIDs, int configRead, int options);
 
     /*
      * typedef struct
@@ -193,12 +193,14 @@ internal class Program
 		var size = Marshal.SizeOf(typeof(NeoDeviceEx));
 		NeoDeviceEx[] managedArray = new NeoDeviceEx[2];
 
+		//take first chunk of memory at IntPtr location, try to turn it into NeoDeviceEx
+		//is the size of the struct fixed?
 		IntPtr ins = new IntPtr(arrayOfDevices.ToInt32());
 		Console.WriteLine("Will it marshal?");
 		managedArray[0] = (NeoDeviceEx)Marshal.PtrToStructure(ins, typeof(NeoDeviceEx));
 		//managedArray[0] = Marshal.PtrToStructure<NeoDeviceEx>(ins);
 		
-		IntPtr x = IntPtr.Zero;
+		int x = 0;
 		
 		if (true)
 		{
