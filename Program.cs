@@ -60,9 +60,10 @@ internal class Program
 {
 
     [DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern int icsneoFindDevices(ref IntPtr possibleDevices, ref int numDevices, uint deviceTypes, uint numDeviceTypes, IntPtr optionsFindeNeoEx, ulong reserved);
+    private static extern int icsneoFindDevices(out IntPtr possibleDevices, ref int numDevices, uint deviceTypes, uint numDeviceTypes, IntPtr optionsFindeNeoEx, ulong reserved);
 
-    [DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+
+	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 	private static extern int icsneoGenericAPISendCommand(out IntPtr handle, char apiIndex, char instanceIndex, char functionIndex, byte[] bData, int length, out char functionError);
 	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 	private static extern int icsneoOpenNeoDevice(ref NeoDevice device, IntPtr handle, IntPtr networkIDs, int configRead, int options);
@@ -188,7 +189,7 @@ internal class Program
 
 		Console.WriteLine(numberOfDevices);
 		// IntPtr as a handle for the array of devices works
-		icsneoFindDevices(ref pointerToArray, ref numberOfDevices, 0, 0, new IntPtr(), 0);
+		icsneoFindDevices(out pointerToArray, ref numberOfDevices, 0, 0, new IntPtr(), 0);
         Console.WriteLine($"Number of devices {numberOfDevices}");
 		Console.WriteLine(pointerToArray);
 
