@@ -2,6 +2,7 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Text;
 
 [StructLayout(LayoutKind.Sequential)]
 public struct NeoDeviceEx
@@ -62,15 +63,15 @@ internal class Program
 {
 
     [DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern int icsneoFindDevices(IntPtr possibleDevices, ref int numDevices, uint deviceTypes, uint numDeviceTypes, IntPtr optionsFindeNeoEx, ulong reserved);
+    private static extern int icsneoFindDevices(IntPtr possibleDevices, ref int numDevices, IntPtr deviceTypes, uint numDeviceTypes, IntPtr optionsFindeNeoEx, uint reserved);
 
 
 	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 	private static extern int icsneoGenericAPISendCommand(out IntPtr handle, char apiIndex, char instanceIndex, char functionIndex, byte[] bData, int length, out char functionError);
 	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	private static extern int icsneoOpenNeoDevice(IntPtr device, IntPtr handle, IntPtr networkIDs, int configRead, int options);
+	private static extern int icsneoOpenNeoDevice(out IntPtr device, IntPtr handle, IntPtr networkIDs, int configRead, int options);
     [DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern int icsneoSerialNumberToString(int serialNumber, [MarshalAs(UnmanagedType.LPArray, SizeConst = 100)] char[] buffer, int lengthOfBuffer);
+    private static extern int icsneoSerialNumberToString(int serialNumber, [MarshalAs(UnmanagedType.LPStr)] StringBuilder data, int lengthOfBuffer);
 
     /*
      * typedef struct
@@ -194,9 +195,11 @@ internal class Program
 			longPtr += Marshal.SizeOf(typeof(NeoDeviceEx));
 		}
 
+	
+
 		Console.WriteLine(numberOfDevices);
 		// IntPtr as a handle for the array of devices works
-		icsneoFindDevices(pointerToArray, ref numberOfDevices, 0, 0, new IntPtr(), 0);
+		icsneoFindDevices(pointerToArray, ref numberOfDevices, IntPtr.Zero, 0, IntPtr.Zero, 0);
         Console.WriteLine($"Number of devices {numberOfDevices}");
 		Console.WriteLine(pointerToArray);
 
@@ -220,14 +223,18 @@ internal class Program
 		if (true)
 		{
 			//Marshall IntPtr to neoDeviceEx
-			char[] buffer = new char[100];
-			icsneoSerialNumberToString(deviceEx.neoDevice.SerialNumber, buffer, 100);
-            Console.WriteLine(buffer);
-			//allocate memory for neoDevice
-			IntPtr handlePointer = IntPtr.Zero;
+			StringBuilder stringBuilder = new StringBuilder();
+			icsneoSerialNumberToString(deviceEx.neoDevice.SerialNumber, stringBuilder, 100);
+            Console.WriteLine(stringBuilder);
+			
+			
+            //allocate memory for handle, idk what else it's meant to be
+            IntPtr handlePointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NeoDeviceEx)));
+
+            //allocate memory for neoDevice, then convert managed struct to unmanaged
             IntPtr pointerToDevice = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NeoDevice)));
             Marshal.StructureToPtr(deviceEx.neoDevice, pointerToDevice, false);
-            Console.WriteLine($"Opened device {icsneoOpenNeoDevice(pointerToDevice, handlePointer, new IntPtr(), 1, 0)}");
+            Console.WriteLine($"Opened device {icsneoOpenNeoDevice(out pointerToDevice, handlePointer, IntPtr.Zero, 1, 0)}");
         } else
 		{
             Console.WriteLine($"List is null");
