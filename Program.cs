@@ -64,10 +64,6 @@ internal class Program
 
     [DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern int icsneoFindDevices(IntPtr possibleDevices, ref int numDevices, IntPtr deviceTypes, uint numDeviceTypes, IntPtr optionsFindeNeoEx, uint reserved);
-
-
-	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	private static extern int icsneoGenericAPISendCommand(out IntPtr handle, char apiIndex, char instanceIndex, char functionIndex, byte[] bData, int length, out char functionError);
 	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 	private static extern int icsneoOpenNeoDevice(out IntPtr device, IntPtr handle, IntPtr networkIDs, int configRead, int options);
     [DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
@@ -163,25 +159,9 @@ internal class Program
 	 */
     private static void Main(string[] args)
 	{
-		Console.WriteLine("Hello, World!");
-
-		IntPtr parameters = IntPtr.Zero;
-        //char functionError;
-
-		uint SensorBufferSize = 64;
-        byte[] pParameters = new byte[512];
-        pParameters[0] = 1;
-        pParameters[1] = 1;
-        pParameters[2] = (byte)((SensorBufferSize >> 8) & 0xFF);
-        pParameters[3] = (byte)(SensorBufferSize & 0xFF);
-
-        //var device = icsneoFindDevices(icsneoFindDevices, 1, null, 0, null, 0);
-        Console.WriteLine(icsneoGenericAPISendCommand(out IntPtr handle, '1', '0', '2', pParameters, '4', out char functionError));
 
 		//c array of neoDeviceEx, gets populated
 		//need to access first item in array, and get neoDevice from it
-		
-		
 		int numberOfDevices = 1;
 
         //allocate memory for array of deviceExs
@@ -195,49 +175,32 @@ internal class Program
 			longPtr += Marshal.SizeOf(typeof(NeoDeviceEx));
 		}
 
-	
-
-		Console.WriteLine(numberOfDevices);
 		// IntPtr as a handle for the array of devices works
 		icsneoFindDevices(pointerToArray, ref numberOfDevices, IntPtr.Zero, 0, IntPtr.Zero, 0);
-        Console.WriteLine($"Number of devices {numberOfDevices}");
-		Console.WriteLine(pointerToArray);
-
-		//trying to pass in an array of devices does not work
-		//can I marshall it into my struct?
-        //NeoDeviceEx[] handle2 = new NeoDeviceEx[10];
-		//Marshal.PtrToStructure(intHandle, typeof(NeoDeviceEx));
-        //icsneoFindDevices(out handle2, ref numberOfDevices, 0, 0, 0, 0);
-
-		//var size = Marshal.SizeOf(typeof(NeoDeviceEx));
-		//NeoDeviceEx[] managedArray = new NeoDeviceEx[2];
-
+        Console.WriteLine($"Number of devices found: {numberOfDevices}");
 
 		//take first chunk of memory at IntPtr location, try to turn it into a NeoDeviceEx
-		Console.WriteLine("Will it marshal?");
-		NeoDeviceEx deviceEx = (NeoDeviceEx)Marshal.PtrToStructure(new IntPtr(pointerToArray.ToInt64()), typeof(NeoDeviceEx));
-		//managedArray[0] = Marshal.PtrToStructure<NeoDeviceEx>(ins);
+		NeoDeviceEx deviceEx = Marshal.PtrToStructure<NeoDeviceEx>(pointerToArray);// (NeoDeviceEx)Marshal.PtrToStructure(new IntPtr(pointerToArray.ToInt64()), typeof(NeoDeviceEx));	
 		
-	
-		
-		if (true)
-		{
-			//Marshall IntPtr to neoDeviceEx
-			StringBuilder stringBuilder = new StringBuilder();
-			icsneoSerialNumberToString(deviceEx.neoDevice.SerialNumber, stringBuilder, 100);
-            Console.WriteLine(stringBuilder);
-			
-			
-            //allocate memory for handle, idk what else it's meant to be
-            IntPtr handlePointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NeoDeviceEx)));
+		//find serial number of found device
+		StringBuilder stringBuilder = new StringBuilder();
+		icsneoSerialNumberToString(deviceEx.neoDevice.SerialNumber, stringBuilder, 100);
+        Console.WriteLine($"Serial number of first device: {stringBuilder}");
 
-            //allocate memory for neoDevice, then convert managed struct to unmanaged
-            IntPtr pointerToDevice = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NeoDevice)));
-            Marshal.StructureToPtr(deviceEx.neoDevice, pointerToDevice, false);
-            Console.WriteLine($"Opened device {icsneoOpenNeoDevice(out pointerToDevice, handlePointer, IntPtr.Zero, 1, 0)}");
+		//allocate memory for handle, idk how big it should be, so go big
+		IntPtr handlePointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NeoDeviceEx)));
+
+        //allocate memory for neoDevice, then convert managed struct to unmanaged
+        IntPtr pointerToDevice = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NeoDevice)));
+        Marshal.StructureToPtr(deviceEx.neoDevice, pointerToDevice, false);
+
+		if (icsneoOpenNeoDevice(out pointerToDevice, handlePointer, IntPtr.Zero, 1, 0) == 1) {
+            Console.WriteLine($"Opened device");
         } else
 		{
-            Console.WriteLine($"List is null");
+            Console.WriteLine($"Cannot open device");
         }
+
+		//TODO: after allocating memory manually, it needs cleaning up otherwise memory leak
     }
 }
