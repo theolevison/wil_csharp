@@ -57,16 +57,53 @@ public struct NeoDevice
 	public int MaxAllowedClients;
 }
 
+[StructLayout(LayoutKind.Sequential)]
+public struct IcsSpyMessage
+{
+    public uint StatusBitField;
+    public uint StatusBitField2;
+    public uint TimeHardware;
+    public uint TimeHardware2;
+    public uint TimeSystem;
+    public uint TimeSystem2;
+    public byte TimeStampHardwareID;
+    public byte TimeStampSystemID;
+    public byte NetworkID;
+    public byte NodeID;
+    public byte Protocol;
+    public byte MessagePieceID;
+    public byte ExtraDataPtrEnabled;
+    public byte NumberBytesHeader;
+    public byte NumberBytesData;
+    public byte NetworkID2;
+    public short DescriptionID; //int16_t or uint32_t depending on vspy version, as far as I could tell
+    public uint ArbIDOrHeader;
+
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+    public byte[] Data;
+
+    
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+    public byte[] AckBytes; //replaced the union with just this pointer
+  
+
+    public IntPtr ExtraDataPtr;
+    public byte MiscData;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+    public byte[] Reserved;
+}
+
 internal class Program
 {
 	//TODO: If these dlls are in a different location on your computer, change the code to match!
-    [DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern int icsneoFindDevices(IntPtr possibleDevices, ref int numDevices, IntPtr deviceTypes, uint numDeviceTypes, IntPtr optionsFindeNeoEx, uint reserved);
+	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+	private static extern int icsneoFindDevices(IntPtr possibleDevices, ref int numDevices, IntPtr deviceTypes, uint numDeviceTypes, IntPtr optionsFindeNeoEx, uint reserved);
 	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 	private static extern int icsneoOpenNeoDevice(IntPtr device, IntPtr handle, IntPtr networkIDs, int configRead, int options);
-    [DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern int icsneoSerialNumberToString(int serialNumber, [MarshalAs(UnmanagedType.LPStr)] StringBuilder data, int lengthOfBuffer);
-
+	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+	private static extern int icsneoSerialNumberToString(int serialNumber, [MarshalAs(UnmanagedType.LPStr)] StringBuilder data, int lengthOfBuffer);
+	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+	private static extern int icsneoGetMessages(IntPtr handle, IntPtr icsSpyMessage, int numberOfMessages, int numberOfErrors);
     private static void Main(string[] args)
 	{		
 		//create array of neoDeviceEx, gets populated by c function
@@ -108,6 +145,25 @@ internal class Program
 		if (icsneoOpenNeoDevice(pointerToDevice, handlePointer, IntPtr.Zero, 1, 0) == 1) {
             //--> at this point, global var `hObject` is a reference to the open wBMS device;
             Console.WriteLine($"Opened device");
+
+            //allocate memory for array of deviceExs
+            IcsSpyMessage[] arrayOfMessages = new IcsSpyMessage[2000];
+            IntPtr pointerToMsgArray = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(IcsSpyMessage)) * arrayOfMessages.Length);
+            long longPtr2 = pointerToMsgArray.ToInt64();
+            for (int i = 0; i < arrayOfMessages.Length; i++)
+            {
+                IntPtr tempPtr2 = new IntPtr(longPtr2);
+                Marshal.StructureToPtr(arrayOfMessages[i], tempPtr2, false);
+                longPtr2 += Marshal.SizeOf(typeof(IcsSpyMessage));
+            }
+
+			int numberMessages = 0;
+			int numberErrors = 0;
+
+			if (icsneoGetMessages(handlePointer, pointerToMsgArray, numberMessages, numberErrors) == 1)
+			{
+				Console.WriteLine("Message recieved");
+			} 
         } else
 		{
             Console.WriteLine($"Cannot open device");
