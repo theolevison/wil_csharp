@@ -4,9 +4,9 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 
-/*
- * [StructLayout(LayoutKind.Sequential)]
-    public struct icsSpyMessage   //reff
+
+  [StructLayout(LayoutKind.Sequential)]
+    public struct IcsSpyMessage   //reff
     {
         public Int32 StatusBitField; //4
         public Int32 StatusBitField2; //new '4
@@ -44,7 +44,7 @@ using System.Text;
         public byte Reserved2;
         public byte Reserved3;
     }
- */
+ 
 
 [StructLayout(LayoutKind.Sequential)]
 public struct NeoDeviceEx
@@ -99,6 +99,7 @@ public struct NeoDevice
 	public int MaxAllowedClients;
 }
 
+/*
 [StructLayout(LayoutKind.Sequential)]
 public struct IcsSpyMessage
 {
@@ -134,6 +135,7 @@ public struct IcsSpyMessage
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
     public byte[] Reserved;
 }
+*/
 
 internal class Program
 {
