@@ -10,9 +10,7 @@ public struct NeoDeviceEx
 	public NeoDevice neoDevice;
 
 	public uint FirmwareMajor;
-	public uint FirmwareMinor;
-
-	
+	public uint FirmwareMinor;	
 
 	//#define CANNODE_STATUS_COREMINI_IS_RUNNING (0x1)
 	//#define CANNODE_STATUS_IN_BOOTLOADER (0x2)
@@ -61,16 +59,16 @@ public struct NeoDevice
 
 internal class Program
 {
-
+	//TODO: If these dlls are in a different location on your computer, change the code to match!
     [DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern int icsneoFindDevices(IntPtr possibleDevices, ref int numDevices, IntPtr deviceTypes, uint numDeviceTypes, IntPtr optionsFindeNeoEx, uint reserved);
 	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	private static extern int icsneoOpenNeoDevice(out IntPtr device, out IntPtr handle, IntPtr networkIDs, int configRead, int options);
+	private static extern int icsneoOpenNeoDevice(IntPtr device, IntPtr handle, IntPtr networkIDs, int configRead, int options);
     [DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern int icsneoSerialNumberToString(int serialNumber, [MarshalAs(UnmanagedType.LPStr)] StringBuilder data, int lengthOfBuffer);
 
     private static void Main(string[] args)
-	{
+	{		
 		//create array of neoDeviceEx, gets populated by c function
 		//need to access first item in array, and get neoDevice from it
 		int numberOfDevices = 1;
@@ -107,7 +105,7 @@ internal class Program
 
 		//if the firmware is not correct, may not work?
 		//can be overloaded in c, but overload in c# is not implemented yet
-		if (icsneoOpenNeoDevice(out pointerToDevice, out handlePointer, IntPtr.Zero, 1, 0) == 1) {
+		if (icsneoOpenNeoDevice(pointerToDevice, handlePointer, IntPtr.Zero, 1, 0) == 1) {
             //--> at this point, global var `hObject` is a reference to the open wBMS device;
             Console.WriteLine($"Opened device");
         } else
@@ -116,5 +114,6 @@ internal class Program
         }
 
 		//TODO: after allocating memory manually, it needs cleaning up otherwise memory leak
+		
     }
 }
