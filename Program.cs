@@ -143,31 +143,46 @@ internal class Program
 		//if the firmware is not correct, may not work?
 		//can be overloaded in c, but overload in c# is not implemented yet
 		if (icsneoOpenNeoDevice(pointerToDevice, handlePointer, IntPtr.Zero, 1, 0) == 1) {
-            //--> at this point, global var `hObject` is a reference to the open wBMS device;
-            Console.WriteLine($"Opened device");
+			//--> at this point, global var `hObject` is a reference to the open wBMS device;
+			Console.WriteLine($"Opened device");
 
-            //allocate memory for array of deviceExs
-            IcsSpyMessage[] arrayOfMessages = new IcsSpyMessage[2000];
-            IntPtr pointerToMsgArray = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(IcsSpyMessage)) * arrayOfMessages.Length);
-            long longPtr2 = pointerToMsgArray.ToInt64();
-            for (int i = 0; i < arrayOfMessages.Length; i++)
-            {
-                IntPtr tempPtr2 = new IntPtr(longPtr2);
-                Marshal.StructureToPtr(arrayOfMessages[i], tempPtr2, false);
-                longPtr2 += Marshal.SizeOf(typeof(IcsSpyMessage));
-            }
+
+			/*
+			 * //Query both ports first
+				{"test_wbms_QueryDeviceOnPort1", test_wbms_QueryDeviceOnPort1}, // Query ports
+				{"test_wbms_QueryDeviceOnPort2", test_wbms_QueryDeviceOnPort2}, // Query ports
+
+				{"test_wbms_Connect", test_wbms_Connect}, // ALL MODE
+			*/
+
+
+			//allocate memory for array of deviceExs
+			IcsSpyMessage[] arrayOfMessages = new IcsSpyMessage[2000];
+			IntPtr pointerToMsgArray = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(IcsSpyMessage)) * arrayOfMessages.Length);
+			long longPtr2 = pointerToMsgArray.ToInt64();
+			for (int i = 0; i < arrayOfMessages.Length; i++)
+			{
+				IntPtr tempPtr2 = new IntPtr(longPtr2);
+				Marshal.StructureToPtr(arrayOfMessages[i], tempPtr2, false);
+				longPtr2 += Marshal.SizeOf(typeof(IcsSpyMessage));
+			}
 
 			int numberMessages = 0;
 			int numberErrors = 0;
 
-			if (icsneoGetMessages(handlePointer, pointerToMsgArray, ref numberMessages, ref numberErrors) == 1)
+			while (true)
 			{
-				Console.WriteLine($"Number of messages recieved: {numberMessages}");
-                Console.WriteLine($"Number of errors recieved: {numberErrors}");
-            } else
-			{
-				Console.WriteLine("Error getting messages");
+				if (icsneoGetMessages(handlePointer, pointerToMsgArray, ref numberMessages, ref numberErrors) == 1)
+				{
+					Console.WriteLine($"Number of messages recieved: {numberMessages}");
+					Console.WriteLine($"Number of errors recieved: {numberErrors}");
+				}
+				else
+				{
+					Console.WriteLine("Error getting messages");
+				}
 			}
+		
         } else
 		{
             Console.WriteLine($"Cannot open device");
