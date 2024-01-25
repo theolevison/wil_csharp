@@ -4,6 +4,48 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 
+/*
+ * [StructLayout(LayoutKind.Sequential)]
+    public struct icsSpyMessage   //reff
+    {
+        public Int32 StatusBitField; //4
+        public Int32 StatusBitField2; //new '4
+        public Int32 TimeHardware; // 4
+        public Int32 TimeHardware2; //new ' 4
+        public Int32 TimeSystem; // 4
+        public Int32 TimeSystem2;
+        public byte TimeStampHardwareID; //new ' 1
+        public byte TimeStampSystemID;
+        public byte NetworkID; //new ' 1
+        public byte NodeID;
+        public byte Protocol;
+        public byte MessagePieceID; // 1
+        public byte ExtraDataPtrEnabled; //1
+        public byte NumberBytesHeader; // 1
+        public byte NumberBytesData; // 1
+        public byte NetworkID2;//1
+        public Int16 DescriptionID; // 2
+        public Int32 ArbIDOrHeader; // Holds (up to 3 byte 1850 header or 29 bit CAN header) '4
+        //public byte[] Data = new byte[8]; //(1 To 8); //8
+        public byte Data1;
+        public byte Data2;
+        public byte Data3;
+        public byte Data4;
+        public byte Data5;
+        public byte Data6;
+        public byte Data7;
+        public byte Data8;
+        public Int32 StatusBitField3;
+        public Int32 StatusBitField4;
+        //public byte[] AckBytes = new byte[8]; //(1 To 8); //new '8
+        public IntPtr iExtraDataPtr; // As Single ' 4 or 8 depending on system
+        public byte MiscData;
+        public byte Reserved1;
+        public byte Reserved2;
+        public byte Reserved3;
+    }
+ */
+
 [StructLayout(LayoutKind.Sequential)]
 public struct NeoDeviceEx
 {
@@ -103,7 +145,7 @@ internal class Program
 	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 	private static extern int icsneoSerialNumberToString(int serialNumber, [MarshalAs(UnmanagedType.LPStr)] StringBuilder data, int lengthOfBuffer);
 	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	private static extern int icsneoGetMessages(IntPtr handle, IntPtr icsSpyMessage, ref int numberOfMessages, ref int numberOfErrors);
+	private static extern int icsneoGetMessages(IntPtr handle, ref IcsSpyMessage icsSpyMessage, ref int numberOfMessages, ref int numberOfErrors);
     private static void Main(string[] args)
 	{		
 		//create array of neoDeviceEx, gets populated by c function
@@ -157,7 +199,9 @@ internal class Program
 
 
 			//allocate memory for array of deviceExs
+			//TODO: test if this is necessary, might be allocated by C function
 			IcsSpyMessage[] arrayOfMessages = new IcsSpyMessage[2000];
+			/*
 			IntPtr pointerToMsgArray = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(IcsSpyMessage)) * arrayOfMessages.Length);
 			long longPtr2 = pointerToMsgArray.ToInt64();
 			for (int i = 0; i < arrayOfMessages.Length; i++)
@@ -166,22 +210,20 @@ internal class Program
 				Marshal.StructureToPtr(arrayOfMessages[i], tempPtr2, false);
 				longPtr2 += Marshal.SizeOf(typeof(IcsSpyMessage));
 			}
+			*/
 
 			int numberMessages = 0;
 			int numberErrors = 0;
-
-			while (true)
+			
+			if (icsneoGetMessages(handlePointer, ref arrayOfMessages[0], ref numberMessages, ref numberErrors) == 1)
 			{
-				if (icsneoGetMessages(handlePointer, pointerToMsgArray, ref numberMessages, ref numberErrors) == 1)
-				{
-					Console.WriteLine($"Number of messages recieved: {numberMessages}");
-					Console.WriteLine($"Number of errors recieved: {numberErrors}");
-				}
-				else
-				{
-					Console.WriteLine("Error getting messages");
-				}
+				Console.WriteLine($"Number of messages recieved: {numberMessages}");
+				Console.WriteLine($"Number of errors recieved: {numberErrors}");
 			}
+			else
+			{
+				Console.WriteLine("Error getting messages");
+			}			
 		
         } else
 		{
