@@ -103,7 +103,7 @@ internal class Program
 	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 	private static extern int icsneoSerialNumberToString(int serialNumber, [MarshalAs(UnmanagedType.LPStr)] StringBuilder data, int lengthOfBuffer);
 	[DllImport(@"C:\Windows\SysWOW64\icsneo40.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-	private static extern int icsneoGetMessages(IntPtr handle, IntPtr icsSpyMessage, int numberOfMessages, int numberOfErrors);
+	private static extern int icsneoGetMessages(IntPtr handle, IntPtr icsSpyMessage, ref int numberOfMessages, ref int numberOfErrors);
     private static void Main(string[] args)
 	{		
 		//create array of neoDeviceEx, gets populated by c function
@@ -160,10 +160,14 @@ internal class Program
 			int numberMessages = 0;
 			int numberErrors = 0;
 
-			if (icsneoGetMessages(handlePointer, pointerToMsgArray, numberMessages, numberErrors) == 1)
+			if (icsneoGetMessages(handlePointer, pointerToMsgArray, ref numberMessages, ref numberErrors) == 1)
 			{
-				Console.WriteLine("Message recieved");
-			} 
+				Console.WriteLine($"Number of messages recieved: {numberMessages}");
+                Console.WriteLine($"Number of errors recieved: {numberErrors}");
+            } else
+			{
+				Console.WriteLine("Error getting messages");
+			}
         } else
 		{
             Console.WriteLine($"Cannot open device");
